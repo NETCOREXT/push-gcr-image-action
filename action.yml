@@ -1,0 +1,30 @@
+name: 'Push image to GCR'
+description: 'Push image to GCR'
+
+inputs:
+  image:
+    description: "Image Name"
+    required: true
+  service-account-key:
+    description: "Service Account Key"
+    required: true
+  args:
+    description: "push args"
+    default: "-a"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Auth to GCP
+      uses: google-github-actions/auth@v0
+      with:
+        credentials_json: '${{ inputs.service-account-key }}'
+    - name: Setup GCloud
+      uses: google-github-actions/setup-gcloud@v0
+    - name: Configure Docker
+      shell: bash
+      run: gcloud auth configure-docker -q
+    - name: Push Images to GCR
+      shell: bash
+      run: |
+        docker push ${{ inputs.args }} ${{ inputs.image }}
